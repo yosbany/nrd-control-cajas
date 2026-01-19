@@ -1,0 +1,209 @@
+/* Minimal custom styles - most styling handled by Tailwind */
+.hidden {
+  display: none !important;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}
+
+/* Fullscreen styles for operational view */
+#shift-operational-view:fullscreen {
+  width: 100vw;
+  height: 100vh;
+  padding: 0;
+  margin: 0;
+  background: white;
+  overflow-y: auto;
+}
+
+#shift-operational-view:-webkit-full-screen {
+  width: 100vw;
+  height: 100vh;
+  padding: 0;
+  margin: 0;
+  background: white;
+  overflow-y: auto;
+}
+
+#shift-operational-view:-moz-full-screen {
+  width: 100vw;
+  height: 100vh;
+  padding: 0;
+  margin: 0;
+  background: white;
+  overflow-y: auto;
+}
+
+#shift-operational-view:-ms-fullscreen {
+  width: 100vw;
+  height: 100vh;
+  padding: 0;
+  margin: 0;
+  background: white;
+  overflow-y: auto;
+}
+
+/* Fullscreen styles for init view */
+#shift-init-view:fullscreen {
+  width: 100vw;
+  height: 100vh;
+  padding: 0;
+  margin: 0;
+  background: white;
+  overflow-y: auto;
+}
+
+#shift-init-view:-webkit-full-screen {
+  width: 100vw;
+  height: 100vh;
+  padding: 0;
+  margin: 0;
+  background: white;
+  overflow-y: auto;
+}
+
+#shift-init-view:-moz-full-screen {
+  width: 100vw;
+  height: 100vh;
+  padding: 0;
+  margin: 0;
+  background: white;
+  overflow-y: auto;
+}
+
+#shift-init-view:-ms-fullscreen {
+  width: 100vw;
+  height: 100vh;
+  padding: 0;
+  margin: 0;
+  background: white;
+  overflow-y: auto;
+}
+
+/* Modales deben aparecer por encima de elementos en fullscreen */
+#custom-modal,
+#custom-alert,
+#loading-spinner,
+#profile-modal {
+  z-index: 2147483647 !important; /* Máximo z-index posible */
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+}
+
+/* Asegurar que los modales sean visibles incluso cuando hay elementos en fullscreen */
+:fullscreen #custom-modal,
+:fullscreen #custom-alert,
+:fullscreen #loading-spinner,
+:fullscreen #profile-modal,
+:-webkit-full-screen #custom-modal,
+:-webkit-full-screen #custom-alert,
+:-webkit-full-screen #loading-spinner,
+:-webkit-full-screen #profile-modal,
+:-moz-full-screen #custom-modal,
+:-moz-full-screen #custom-alert,
+:-moz-full-screen #loading-spinner,
+:-moz-full-screen #profile-modal,
+:-ms-fullscreen #custom-modal,
+:-ms-fullscreen #custom-alert,
+:-ms-fullscreen #loading-spinner,
+:-ms-fullscreen #profile-modal {
+  z-index: 2147483647 !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+}
+
+/* Cuando un elemento está en fullscreen, los modales deben aparecer por encima */
+#shift-operational-view:fullscreen ~ #custom-modal,
+#shift-operational-view:fullscreen ~ #custom-alert,
+#shift-operational-view:fullscreen ~ #loading-spinner,
+#shift-operational-view:fullscreen ~ #profile-modal,
+#shift-init-view:fullscreen ~ #custom-modal,
+#shift-init-view:fullscreen ~ #custom-alert,
+#shift-init-view:fullscreen ~ #loading-spinner,
+#shift-init-view:fullscreen ~ #profile-modal {
+  z-index: 2147483647 !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+}
+
+/* Los modales siempre deben estar en el body, no dentro del elemento en fullscreen */
+body:has(#shift-operational-view:fullscreen) #custom-modal,
+body:has(#shift-operational-view:fullscreen) #custom-alert,
+body:has(#shift-operational-view:fullscreen) #loading-spinner,
+body:has(#shift-operational-view:fullscreen) #profile-modal,
+body:has(#shift-init-view:fullscreen) #custom-modal,
+body:has(#shift-init-view:fullscreen) #custom-alert,
+body:has(#shift-init-view:fullscreen) #loading-spinner,
+body:has(#shift-init-view:fullscreen) #profile-modal {
+  z-index: 2147483647 !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+}
+
+/* Estilos adicionales para cuando cualquier elemento está en fullscreen */
+:fullscreen ~ #custom-modal,
+:fullscreen ~ #custom-alert,
+:fullscreen ~ #loading-spinner,
+:fullscreen ~ #profile-modal,
+:-webkit-full-screen ~ #custom-modal,
+:-webkit-full-screen ~ #custom-alert,
+:-webkit-full-screen ~ #loading-spinner,
+:-webkit-full-screen ~ #profile-modal,
+:-moz-full-screen ~ #custom-modal,
+:-moz-full-screen ~ #custom-alert,
+:-moz-full-screen ~ #loading-spinner,
+:-moz-full-screen ~ #profile-modal,
+:-ms-fullscreen ~ #custom-modal,
+:-ms-fullscreen ~ #custom-alert,
+:-ms-fullscreen ~ #loading-spinner,
+:-ms-fullscreen ~ #profile-modal {
+  z-index: 2147483647 !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+}
+
+/* Optimización para pantallas táctiles 800x600 */
+@media (max-width: 800px) and (max-height: 600px) {
+  #shift-operational-view .text-sm {
+    font-size: 0.875rem;
+  }
+  
+  #shift-operational-view .text-base {
+    font-size: 1rem;
+  }
+  
+  #shift-operational-view .text-lg {
+    font-size: 1.125rem;
+  }
+  
+  #shift-operational-view button {
+    min-height: 48px;
+    font-size: 1rem;
+  }
+  
+  #shift-operational-view .p-4 {
+    padding: 0.75rem;
+  }
+  
+  #shift-operational-view .space-y-6 > * + * {
+    margin-top: 1rem;
+  }
+}
