@@ -1,5 +1,65 @@
 // Authentication state management
 let currentUser = null;
+let authCheckComplete = false;
+
+// Show redirecting screen
+function showRedirectingScreen() {
+  const redirectingScreen = document.getElementById('redirecting-screen');
+  const loginScreen = document.getElementById('login-screen');
+  const appScreen = document.getElementById('app-screen');
+  
+  if (redirectingScreen) redirectingScreen.classList.remove('hidden');
+  if (loginScreen) loginScreen.classList.add('hidden');
+  if (appScreen) appScreen.classList.add('hidden');
+}
+
+// Hide redirecting screen
+function hideRedirectingScreen() {
+  const redirectingScreen = document.getElementById('redirecting-screen');
+  if (redirectingScreen) redirectingScreen.classList.add('hidden');
+}
+
+// Check for stored token in localStorage
+function hasStoredToken() {
+  try {
+    // Firebase stores auth tokens in localStorage with keys like "firebase:authUser:{API_KEY}:{PROJECT_ID}"
+    const keys = Object.keys(localStorage);
+    const firebaseAuthKeys = keys.filter(key => key.startsWith('firebase:authUser:'));
+    return firebaseAuthKeys.length > 0;
+  } catch (error) {
+    logger.error('Error checking stored token', error);
+    return false;
+  }
+}
+
+// Initialize auth check
+function initAuthCheck() {
+  // Show redirecting screen first
+  showRedirectingScreen();
+  
+  // Check if there's a stored token
+  const hasToken = hasStoredToken();
+  
+  if (hasToken) {
+    logger.debug('Stored token found, waiting for auth state change');
+    // Wait a bit for Firebase to restore the session
+    setTimeout(() => {
+      if (!authCheckComplete) {
+        // If still not authenticated after timeout, show login
+        logger.info('Token found but authentication not restored, showing login');
+        hideRedirectingScreen();
+        showLoginScreen();
+      }
+    }, 2000); // 2 second timeout
+  } else {
+    logger.debug('No stored token found, showing login immediately');
+    // No token, show login immediately
+    setTimeout(() => {
+      hideRedirectingScreen();
+      showLoginScreen();
+    }, 300); // Small delay for smooth transition
+  }
+}
 
 // Initialize auth when DOM and nrd are ready
 function initializeAuth() {
@@ -17,8 +77,12 @@ function initializeAuth() {
     
     if (initializeAuth.attempts >= maxAttempts) {
       logger.error('NRD Data Access initialization failed after multiple attempts. Showing login screen.');
-      // Fallback: show login screen if nrd never becomes available
-      showLoginScreen();
+      // Fallback: show redirecting screen first, then login
+      showRedirectingScreen();
+      setTimeout(() => {
+        hideRedirectingScreen();
+        showLoginScreen();
+      }, 300);
       return;
     }
     
@@ -32,10 +96,18 @@ function initializeAuth() {
     delete initializeAuth.attempts;
   }
   
+  // Initialize auth check (shows redirecting screen and checks token)
+  initAuthCheck();
+  
   // Listen for auth state changes using NRD Data Access
   nrd.auth.onAuthStateChanged((user) => {
     try {
+      authCheckComplete = true;
       currentUser = user;
+      
+      // Hide redirecting screen
+      hideRedirectingScreen();
+      
       if (user) {
         logger.info('User authenticated, showing app screen', { uid: user.uid, email: user.email });
         showAppScreen();
@@ -45,6 +117,7 @@ function initializeAuth() {
       }
     } catch (error) {
       logger.error('Error in auth state change', error);
+      hideRedirectingScreen();
       // Fallback: show login screen
       const loginScreen = document.getElementById('login-screen');
       const appScreen = document.getElementById('app-screen');
