@@ -1,110 +1,171 @@
-// Main app controller
+// Main app controller (ES Module)
+// Using NRDCommon from CDN (loaded in index.html)
+const logger = window.logger || console;
 
-// Get nrd instance safely (always use window.nrd as it's set globally in index.html)
-// Initialize safely - wait for window.nrd to be available
-var nrd = window.nrd || (typeof NRDDataAccess !== 'undefined' ? new NRDDataAccess() : null);
+import { initializeShifts } from './views/shifts/shifts.js';
+import { initializeShiftInit } from './views/shift-init/shift-init.js';
+import { initializeShiftOperational } from './views/shift-operational/shift-operational.js';
+import { initializeShiftDetail } from './views/shift-detail/shift-detail.js';
 
-// Ensure nrd is available before using it
-function ensureNrd() {
-  if (!window.nrd) {
-    logger.warn('window.nrd not available yet, retrying...');
-    setTimeout(() => {
-      if (window.nrd) {
-        nrd = window.nrd;
-      }
-    }, 100);
-  }
-}
-ensureNrd();
-
-// Navigation
-let currentView = null;
-let currentViewParam = null; // Para pasar parámetros a las vistas (ej: shiftId)
-
-function switchView(viewName, param = null) {
-  // Prevent duplicate loading
-  if (currentView === viewName && currentViewParam === param) {
-    logger.debug('View already active, skipping', { viewName, param });
+// Setup navigation buttons
+function setupNavigationButtons() {
+  const navContainer = document.getElementById('app-nav-container');
+  if (!navContainer) {
+    logger.warn('Navigation container not found');
     return;
   }
   
-  logger.info('Switching view', { from: currentView, to: viewName, param });
-  currentView = viewName;
-  currentViewParam = param;
-
-  // Hide all views
-  const views = ['shifts', 'shift-init', 'shift-operational', 'shift-detail'];
-  views.forEach(view => {
-    const viewElement = document.getElementById(`${view}-view`);
-    if (viewElement) {
-      viewElement.classList.add('hidden');
-    }
-  });
-
-  // Show selected view
-  const selectedView = document.getElementById(`${viewName}-view`);
-  if (selectedView) {
-    selectedView.classList.remove('hidden');
-    logger.debug('View shown', { viewName });
-  } else {
-    logger.warn('View element not found', { viewName });
-  }
-
-  // Update nav buttons
-  document.querySelectorAll('.nav-btn').forEach(btn => {
-    btn.classList.remove('border-red-600', 'text-red-600', 'bg-red-50', 'font-medium');
-    btn.classList.add('border-transparent', 'text-gray-600');
-  });
-  const activeBtn = document.querySelector(`[data-view="${viewName}"]`);
-  if (activeBtn) {
-    activeBtn.classList.remove('border-transparent', 'text-gray-600');
-    activeBtn.classList.add('border-red-600', 'text-red-600', 'bg-red-50', 'font-medium');
-  } else {
-    logger.warn('Active nav button not found', { viewName });
-  }
-
-  // Load data for the view
-  logger.debug('Loading view data', { viewName, param });
+  navContainer.className = 'bg-white border-b border-gray-200 flex overflow-x-auto';
   
-  if (viewName === 'shifts') {
-    if (typeof initializeShifts === 'function') {
-      initializeShifts();
-    }
-  } else if (viewName === 'shift-init') {
-    if (typeof initializeShiftInit === 'function') {
-      initializeShiftInit();
-    }
-  } else if (viewName === 'shift-operational') {
-    logger.debug('Checking for initializeShiftOperational function', { 
-      exists: typeof initializeShiftOperational !== 'undefined',
-      isFunction: typeof initializeShiftOperational === 'function'
-    });
-    if (typeof initializeShiftOperational === 'function') {
-      logger.debug('Calling initializeShiftOperational', { param });
-      initializeShiftOperational(param);
-    } else {
-      logger.warn('initializeShiftOperational is not a function', { 
-        type: typeof initializeShiftOperational 
-      });
-    }
-  } else if (viewName === 'shift-detail') {
-    if (typeof initializeShiftDetail === 'function') {
-      initializeShiftDetail(param);
-    }
-  }
-  
-  logger.debug('View switched successfully', { viewName });
+  navContainer.innerHTML = `
+    <button class="nav-btn flex-1 px-3 sm:px-4 py-3 sm:py-3.5 border-b-2 border-red-600 text-red-600 bg-red-50 font-medium transition-colors uppercase tracking-wider text-xs sm:text-sm font-light" data-view="shifts">Turnos</button>
+  `;
 }
 
-// Nav button handlers
-document.querySelectorAll('.nav-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const view = btn.dataset.view;
-    logger.debug('Nav button clicked', { view });
-    switchView(view);
-  });
-});
-logger.debug('Nav button handlers attached');
+// Navigation service will be created when NRDCommon is available
+let navigationService = null;
 
-// Note: View switching is now handled by auth.js when showing app screen
-// This file only defines the switchView function and navigation handlers
+// Function to create and setup navigation service
+function createNavigationService() {
+  if (navigationService) {
+    return navigationService; // Already created
+  }
+  
+  const NavigationService = window.NRDCommon?.NavigationService;
+  if (!NavigationService) {
+    logger.warn('NavigationService not available in NRDCommon');
+    return null;
+  }
+  
+  navigationService = new NavigationService();
+  window.navigationService = navigationService;
+  
+  // Register view handlers
+  navigationService.registerView('shifts', () => {
+    initializeShifts();
+  });
+
+  navigationService.registerView('shift-init', () => {
+    initializeShiftInit();
+  });
+
+  navigationService.registerView('shift-operational', (param) => {
+    initializeShiftOperational(param);
+  });
+
+  navigationService.registerView('shift-detail', (param) => {
+    initializeShiftDetail(param);
+  });
+  
+  logger.info('NavigationService created and views registered');
+  return navigationService;
+}
+
+// Initialize app using NRD Data Access
+// Note: AuthService handles showing/hiding app-screen, we just setup navigation
+logger.info('app.js loaded, waiting for NRD to be available');
+
+// Wait for window.nrd and NRDCommon to be available (they're initialized in index.html)
+function waitForNRDAndInitialize() {
+  const maxWait = 10000; // 10 seconds
+  const startTime = Date.now();
+  const checkInterval = 100; // Check every 100ms
+  
+  const checkNRD = setInterval(() => {
+    const nrd = window.nrd;
+    const NRDCommon = window.NRDCommon;
+    
+    if (nrd && nrd.auth && NRDCommon) {
+      clearInterval(checkNRD);
+      logger.info('NRD, auth, and NRDCommon available, setting up onAuthStateChanged');
+      
+      // Create navigation service now that NRDCommon is available
+      createNavigationService();
+      
+      // Also listen to the current auth state immediately
+      const currentUser = nrd.auth.getCurrentUser();
+      if (currentUser) {
+        logger.info('Current user found, initializing immediately', { uid: currentUser.uid, email: currentUser.email });
+        initializeAppForUser(currentUser);
+      }
+      
+      nrd.auth.onAuthStateChanged((user) => {
+        logger.info('Auth state changed', { hasUser: !!user, uid: user?.uid, email: user?.email });
+        if (user) {
+          initializeAppForUser(user);
+        } else {
+          logger.debug('User not authenticated, app initialization skipped');
+        }
+      });
+    } else if (Date.now() - startTime >= maxWait) {
+      clearInterval(checkNRD);
+      logger.error('NRD, auth, or NRDCommon not available after timeout', { 
+        hasNrd: !!nrd, 
+        hasAuth: !!(nrd && nrd.auth),
+        hasNRDCommon: !!NRDCommon
+      });
+    }
+  }, checkInterval);
+}
+
+// Start waiting for NRD and NRDCommon
+waitForNRDAndInitialize();
+
+function initializeAppForUser(user) {
+  logger.info('Initializing app for user', { uid: user.uid, email: user.email });
+  
+  // Ensure app-screen is visible (AuthService should have done this, but double-check)
+  const appScreen = document.getElementById('app-screen');
+  const loginScreen = document.getElementById('login-screen');
+  const redirectingScreen = document.getElementById('redirecting-screen');
+  
+  if (appScreen) {
+    appScreen.classList.remove('hidden');
+    logger.info('App screen shown');
+  }
+  if (loginScreen) {
+    loginScreen.classList.add('hidden');
+  }
+  if (redirectingScreen) {
+    redirectingScreen.classList.add('hidden');
+  }
+  
+  // Wait a bit for DOM to be ready, then setup navigation
+  setTimeout(() => {
+    // Create navigation service if not already created
+    const navService = createNavigationService();
+    if (!navService) {
+      logger.error('Could not create NavigationService');
+      return;
+    }
+    
+    logger.info('Setting up navigation and switching to shifts');
+    setupNavigationButtons();
+    navService.setupNavButtons();
+    navService.switchView('shifts');
+    
+    // Double-check that app-screen is visible
+    const appScreenCheck = document.getElementById('app-screen');
+    if (appScreenCheck && appScreenCheck.classList.contains('hidden')) {
+      logger.warn('App screen was hidden, showing it now');
+      appScreenCheck.classList.remove('hidden');
+    }
+    
+    // Also check that shifts view is visible
+    const shiftsView = document.getElementById('shifts-view');
+    if (shiftsView) {
+      if (shiftsView.classList.contains('hidden')) {
+        logger.warn('Shifts view was hidden, showing it now');
+        shiftsView.classList.remove('hidden');
+      } else {
+        logger.info('Shifts view is visible');
+      }
+    } else {
+      logger.error('Shifts view element not found');
+    }
+  }, 300);
+}
+
+// AuthService is now initialized in index.html after NRDCommon loads
+// This ensures it handles the redirecting screen immediately
+// We don't need to initialize it here since it's already done in index.html

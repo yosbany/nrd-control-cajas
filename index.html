@@ -7,7 +7,7 @@
   <title>NRD Control de Cajas</title>
   <link rel="manifest" href="manifest.json">
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="styles.css?v=1768852454784">
+  <link rel="stylesheet" href="styles.css?v=1769508307246">
   <meta name="theme-color" content="#dc2626">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="apple-touch-icon" href="icon-192.png">
@@ -70,31 +70,11 @@
 
   <!-- Main App Screen -->
   <div id="app-screen" class="min-h-screen flex flex-col hidden">
-    <header class="bg-red-600 border-b border-red-700 px-3 sm:px-4 py-2.5 sm:py-3 flex justify-between items-center sticky top-0 z-10">
-      <div class="flex items-center gap-2 sm:gap-3">
-        <img src="icon-192.png" alt="NRD Control de Cajas" class="w-8 h-8 sm:w-10 sm:h-10">
-        <h1 class="text-lg sm:text-xl font-light tracking-tight text-white">NRD Control de Cajas</h1>
-      </div>
-      
-      <!-- Lado Derecho: Botonera -->
-      <div class="flex gap-2 items-center">
-        <!-- Botón Instalar (opcional, oculto por defecto) -->
-        <button id="install-btn" 
-          class="px-3 sm:px-4 py-1.5 sm:py-2 border border-white/30 hover:border-white text-white hover:bg-white/10 transition-colors uppercase tracking-wider text-xs font-light hidden">
-          Instalar
-        </button>
-        
-        <!-- Botón Perfil (siempre visible) -->
-        <button id="profile-btn" 
-          class="px-3 sm:px-4 py-1.5 sm:py-2 border border-white/30 hover:border-white text-white hover:bg-white/10 transition-colors uppercase tracking-wider text-xs font-light">
-          Perfil
-        </button>
-      </div>
-    </header>
+    <!-- Header will be inserted here by NRDCommon -->
+    <div id="app-header-container" data-app-name="NRD Control de Cajas" data-icon-path="icon-192.png"></div>
 
-    <nav class="bg-white border-b border-gray-200 flex overflow-x-auto sticky top-[45px] sm:top-[53px] z-10 bg-white">
-      <!-- Navigation buttons will be added here -->
-    </nav>
+    <!-- Navigation will be inserted here by app.js -->
+    <nav id="app-nav-container" class="bg-white border-b border-gray-200 flex overflow-x-auto"></nav>
 
     <main class="flex-1 p-3 sm:p-4 md:p-6 overflow-y-auto max-w-6xl mx-auto w-full">
       <!-- Vista Principal de Turnos -->
@@ -175,54 +155,166 @@
     </div>
   </div>
 
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
-  
-  <!-- NRD Data Access Library -->
-  <script src="https://cdn.jsdelivr.net/gh/yosbany/nrd-data-access@main/dist/nrd-data-access.js"></script>
-  
-  <!-- Logger (must load before other app scripts) -->
-  <script src="logger.js"></script>
-  
-  <!-- Utils (must load before tabs) -->
-  <script src="utils/cash-breakdown.js?v=1768852454784"></script>
-  <script src="utils/shift-validations.js?v=1768852454784"></script>
-  <script src="utils/notifications.js?v=1768852454784"></script>
-  
-  <!-- Firebase Configuration and Initialization -->
+  <!-- NRD Data Access Library (load synchronously, no defer) -->
+  <!-- Firebase is bundled within NRD Data Access Library, no need to load it separately -->
+  <!-- Use local files in development (localhost/127.0.0.1), CDN in production -->
   <script>
-    // Firebase configuration
-    const firebaseConfig = {
-      apiKey: "AIzaSyD02egBPI7FnsliANDKa8noTkVmGMW0POg",
-      authDomain: "nrd-db.firebaseapp.com",
-      databaseURL: "https://nrd-db-default-rtdb.firebaseio.com",
-      projectId: "nrd-db",
-      storageBucket: "nrd-db.firebasestorage.app",
-      messagingSenderId: "544444461682",
-      appId: "1:544444461682:web:110c97ffffc984ddd208eb"
-    };
-
-    // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
-
-    // Initialize NRD Data Access Library (make it global)
-    window.nrd = new NRDDataAccess();
+    (function() {
+      const isLocalhost = window.location.hostname === 'localhost' || 
+                         window.location.hostname === '127.0.0.1' ||
+                         window.location.hostname === '0.0.0.0';
+      
+      const nrdDataAccessSrc = isLocalhost 
+        ? '/nrd-data-access/dist/nrd-data-access.js?v=1769508307246'
+        : 'https://cdn.jsdelivr.net/gh/yosbany/nrd-data-access@main/dist/nrd-data-access.js';
+      
+      console.log('Loading NRD Data Access from:', nrdDataAccessSrc);
+      
+      const script1 = document.createElement('script');
+      script1.src = nrdDataAccessSrc;
+      script1.onerror = function() {
+        console.error('Failed to load NRD Data Access from:', nrdDataAccessSrc);
+      };
+      script1.onload = function() {
+        console.log('NRD Data Access loaded successfully');
+      };
+      document.head.appendChild(script1);
+    })();
   </script>
   
+  <!-- NRD Common Library (load synchronously, no defer) -->
+  <!-- Use local files in development (localhost/127.0.0.1), CDN in production -->
+  <script>
+    (function() {
+      const isLocalhost = window.location.hostname === 'localhost' || 
+                         window.location.hostname === '127.0.0.1' ||
+                         window.location.hostname === '0.0.0.0';
+      
+      const nrdCommonSrc = isLocalhost 
+        ? '/nrd-common/dist/nrd-common.js?v=1769508307246'
+        : 'https://cdn.jsdelivr.net/gh/yosbany/nrd-common@main/dist/nrd-common.js';
+      
+      console.log('Loading NRD Common from:', nrdCommonSrc);
+      
+      const script2 = document.createElement('script');
+      script2.src = nrdCommonSrc;
+      script2.onerror = function() {
+        console.error('Failed to load NRD Common from:', nrdCommonSrc);
+      };
+      script2.onload = function() {
+        console.log('NRD Common loaded successfully');
+      };
+      document.head.appendChild(script2);
+    })();
+  </script>
+  
+  <!-- NRD Common Library Initialization -->
+  <script>
+    // Wait for NRD Common Library to be available and initialize
+    (function() {
+      const maxWait = 10000;
+      const startTime = Date.now();
+      
+      const checkNRDCommon = setInterval(() => {
+        if (typeof window.NRDCommon !== 'undefined') {
+          clearInterval(checkNRDCommon);
+          console.log('NRD Common Library loaded successfully');
+          
+          // Create logger instance FIRST, before anything else uses it
+          window.logger = new window.NRDCommon.Logger('NRD Control de Cajas', {
+            logLevel: window.NRDCommon.LOG_LEVELS.INFO,
+            enableColors: true,
+            enableTimestamp: true
+          });
+          
+          // Expose common functions globally for backward compatibility
+          if (window.NRDCommon) {
+            window.showAlert = window.NRDCommon.showAlert;
+            window.showConfirm = window.NRDCommon.showConfirm;
+            window.showError = window.NRDCommon.showError;
+            window.showSuccess = window.NRDCommon.showSuccess;
+            window.showInfo = window.NRDCommon.showInfo;
+            window.showWarning = window.NRDCommon.showWarning;
+            window.showSpinner = window.NRDCommon.showSpinner;
+            window.hideSpinner = window.NRDCommon.hideSpinner;
+            window.formatNumber = window.NRDCommon.formatNumber;
+            window.formatCurrency = window.NRDCommon.formatCurrency;
+            window.formatDecimalWithComma = window.NRDCommon.formatDecimalWithComma;
+            window.parseDecimalWithComma = window.NRDCommon.parseDecimalWithComma;
+            window.escapeHtml = window.NRDCommon.escapeHtml;
+            window.getMonthName = window.NRDCommon.getMonthName;
+            window.formatDate = window.NRDCommon.formatDate;
+          }
+          
+          // Initialize NRD Data Access using NRDCommon
+          if (window.NRDCommon.initializeNRD) {
+            window.NRDCommon.initializeNRD().then(success => {
+              if (success) {
+                console.log('NRD Data Access initialized successfully');
+                
+                // Initialize AuthService immediately after NRD is ready
+                if (window.NRDCommon.AuthService && window.nrd) {
+                  try {
+                    window.authService = new window.NRDCommon.AuthService(window.nrd);
+                    console.log('AuthService initialized successfully');
+                  } catch (error) {
+                    console.error('Error initializing AuthService:', error);
+                    const redirectingScreen = document.getElementById('redirecting-screen');
+                    const loginScreen = document.getElementById('login-screen');
+                    if (redirectingScreen) redirectingScreen.classList.add('hidden');
+                    if (loginScreen) loginScreen.classList.remove('hidden');
+                  }
+                } else {
+                  console.error('AuthService or nrd not available');
+                  const redirectingScreen = document.getElementById('redirecting-screen');
+                  const loginScreen = document.getElementById('login-screen');
+                  if (redirectingScreen) redirectingScreen.classList.add('hidden');
+                  if (loginScreen) loginScreen.classList.remove('hidden');
+                }
+              } else {
+                console.error('NRD Data Access initialization failed');
+                const redirectingScreen = document.getElementById('redirecting-screen');
+                const loginScreen = document.getElementById('login-screen');
+                if (redirectingScreen) redirectingScreen.classList.add('hidden');
+                if (loginScreen) loginScreen.classList.remove('hidden');
+              }
+            }).catch(error => {
+              console.error('Error initializing NRD Data Access:', error);
+              const redirectingScreen = document.getElementById('redirecting-screen');
+              const loginScreen = document.getElementById('login-screen');
+              if (redirectingScreen) redirectingScreen.classList.add('hidden');
+              if (loginScreen) loginScreen.classList.remove('hidden');
+            });
+          } else {
+            console.error('initializeNRD not available in NRDCommon');
+            const redirectingScreen = document.getElementById('redirecting-screen');
+            const loginScreen = document.getElementById('login-screen');
+            if (redirectingScreen) redirectingScreen.classList.add('hidden');
+            if (loginScreen) loginScreen.classList.remove('hidden');
+          }
+        } else if (Date.now() - startTime >= maxWait) {
+          clearInterval(checkNRDCommon);
+          console.error('NRD Common Library not loaded after timeout');
+          const redirectingScreen = document.getElementById('redirecting-screen');
+          const loginScreen = document.getElementById('login-screen');
+          if (redirectingScreen) redirectingScreen.classList.add('hidden');
+          if (loginScreen) loginScreen.classList.remove('hidden');
+        }
+      }, 100);
+    })();
+  </script>
+  
+  <!-- Utils (must load before views) -->
+  <script type="module" src="modules/cash-breakdown.js?v=1769508307246"></script>
+  <script type="module" src="modules/shift-validations.js?v=1769508307246"></script>
+  <script type="module" src="modules/notifications.js?v=1769508307246"></script>
+  
   <!-- App Scripts -->
-  <script src="modal.js?v=1768852454784"></script>
-  <script src="modal-movements.js?v=1768852454784"></script>
-  <script src="modal-incidents.js?v=1768852454784"></script>
-  <script src="modal-close-shift.js?v=1768852454784"></script>
-  <script src="auth.js?v=1768852454784"></script>
-  <script src="tabs/shifts.js?v=1768852454784"></script>
-  <script src="tabs/shift-init.js?v=1768852454784"></script>
-  <script src="tabs/shift-operational.js?v=1768852454784"></script>
-  <script src="tabs/shift-detail.js?v=1768852454784"></script>
-  <script src="tabs/shift-report.js?v=1768852454784"></script>
-  <script src="app.js?v=1768852454784"></script>
+  <script src="modal.js?v=1769508307246"></script>
+  <script src="modal-movements.js?v=1769508307246"></script>
+  <script src="modal-incidents.js?v=1769508307246"></script>
+  <script src="modal-close-shift.js?v=1769508307246"></script>
+  <script type="module" src="app.js?v=1769508307246"></script>
 
   <script>
     // Global error handler
@@ -273,7 +365,7 @@
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         // Register service worker without version parameter
-        navigator.serviceWorker.register('service-worker.js?v=1768852454784')
+        navigator.serviceWorker.register('service-worker.js?v=1769508307246')
           .then(reg => {
             console.log('Service Worker registered');
             

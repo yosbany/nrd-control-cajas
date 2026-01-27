@@ -36,21 +36,21 @@ def update_version():
     
     # Add version parameter to JS files (except Firebase CDN and external libraries)
     html = re.sub(
-        r'(<script[^>]*src=["\'])(modal[^"\']*\.js|auth\.js|app\.js)(["\'][^>]*>)',
+        r'(<script[^>]*src=["\'])(modal[^"\']*\.js|app\.js)(["\'][^>]*>)',
         rf'\1\2?v={version}\3',
         html
     )
     
-    # Add version parameter to tabs JS files
+    # Add version parameter to views JS files (ES modules)
     html = re.sub(
-        r'(<script[^>]*src=["\'])(tabs/[^"\']+\.js)(["\'][^>]*>)',
+        r'(<script[^>]*type=["\']module["\'][^>]*src=["\'])(views/[^"\']+\.js|modules/[^"\']+\.js)(["\'][^>]*>)',
         rf'\1\2?v={version}\3',
         html
     )
     
-    # Add version parameter to utils JS files
+    # Add version parameter to modules JS files (legacy support)
     html = re.sub(
-        r'(<script[^>]*src=["\'])(utils/[^"\']+\.js)(["\'][^>]*>)',
+        r'(<script[^>]*src=["\'])(modules/[^"\']+\.js)(["\'][^>]*>)',
         rf'\1\2?v={version}\3',
         html
     )
