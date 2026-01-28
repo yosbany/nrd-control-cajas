@@ -37,7 +37,8 @@ function createNavigationService() {
     return null;
   }
   
-  navigationService = new NavigationService();
+  // Pass views explicitly to NavigationService
+  navigationService = new NavigationService(['shifts', 'shift-init', 'shift-operational', 'shift-detail']);
   window.navigationService = navigationService;
   
   // Register view handlers
