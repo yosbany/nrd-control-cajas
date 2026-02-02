@@ -7,7 +7,7 @@
   <title>NRD Control de Cajas</title>
   <link rel="manifest" href="manifest.json">
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="styles.css?v=1769508307246">
+  <link rel="stylesheet" href="styles.css?v=1770061666969">
   <meta name="theme-color" content="#dc2626">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="apple-touch-icon" href="icon-192.png">
@@ -165,7 +165,7 @@
                          window.location.hostname === '0.0.0.0';
       
       const nrdDataAccessSrc = isLocalhost 
-        ? '/nrd-data-access/dist/nrd-data-access.js?v=1769508307246'
+        ? '/nrd-data-access/dist/nrd-data-access.js'
         : 'https://cdn.jsdelivr.net/gh/yosbany/nrd-data-access@main/dist/nrd-data-access.js';
       
       console.log('Loading NRD Data Access from:', nrdDataAccessSrc);
@@ -191,7 +191,7 @@
                          window.location.hostname === '0.0.0.0';
       
       const nrdCommonSrc = isLocalhost 
-        ? '/nrd-common/dist/nrd-common.js?v=1769508307246'
+        ? '/nrd-common/dist/nrd-common.js'
         : 'https://cdn.jsdelivr.net/gh/yosbany/nrd-common@main/dist/nrd-common.js';
       
       console.log('Loading NRD Common from:', nrdCommonSrc);
@@ -305,16 +305,16 @@
   </script>
   
   <!-- Utils (must load before views) -->
-  <script type="module" src="modules/cash-breakdown.js?v=1769508307246"></script>
-  <script type="module" src="modules/shift-validations.js?v=1769508307246"></script>
-  <script type="module" src="modules/notifications.js?v=1769508307246"></script>
+  <script type="module" src="modules/cash-breakdown.js?v=1770061666969"></script>
+  <script type="module" src="modules/shift-validations.js?v=1770061666969"></script>
+  <script type="module" src="modules/notifications.js?v=1770061666969"></script>
   
   <!-- App Scripts -->
-  <script src="modal.js?v=1769508307246"></script>
-  <script src="modal-movements.js?v=1769508307246"></script>
-  <script src="modal-incidents.js?v=1769508307246"></script>
-  <script src="modal-close-shift.js?v=1769508307246"></script>
-  <script type="module" src="app.js?v=1769508307246"></script>
+  <script src="modal.js?v=1770061666969"></script>
+  <script src="modal-movements.js?v=1770061666969"></script>
+  <script src="modal-incidents.js?v=1770061666969"></script>
+  <script src="modal-close-shift.js?v=1770061666969"></script>
+  <script type="module" src="app.js?v=1770061666969"></script>
 
   <script>
     // Global error handler
@@ -365,7 +365,7 @@
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         // Register service worker without version parameter
-        navigator.serviceWorker.register('service-worker.js?v=1769508307246')
+        navigator.serviceWorker.register('service-worker.js?v=1770061666969')
           .then(reg => {
             console.log('Service Worker registered');
             
