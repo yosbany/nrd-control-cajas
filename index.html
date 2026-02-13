@@ -7,29 +7,67 @@
   <title>NRD Control de Cajas</title>
   <link rel="manifest" href="manifest.json">
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="styles.css?v=1770935262961">
+  <link rel="stylesheet" href="styles.css?v=1770991063876">
   <meta name="theme-color" content="#dc2626">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="apple-touch-icon" href="icon-192.png">
   
-  <!-- Force cache reload with version parameter in URL -->
+  <!-- Validate version against server: if server has newer build, force reload to avoid stale cache -->
   <script>
     (function() {
-      // Get current version from stylesheet link
-      const stylesheet = document.querySelector('link[href*="styles.css"]');
-      const versionMatch = stylesheet ? stylesheet.href.match(/[?&]v=(\d+)/) : null;
-      const currentVersion = versionMatch ? versionMatch[1] : Date.now();
-      
-      // Get version from URL
-      const urlParams = new URLSearchParams(window.location.search);
-      const urlVersion = urlParams.get('v');
-      
-      // If URL version doesn't match current version, reload with new version
-      if (urlVersion !== currentVersion) {
-        const url = new URL(window.location.href);
-        url.searchParams.set('v', currentVersion);
-        window.location.replace(url.toString());
+      var link = document.querySelector('link[rel="stylesheet"][href*=".css"]');
+      var localVersion = link && link.href.match(/[?&]v=(\d+)/) ? link.href.match(/[?&]v=(\d+)/)[1] : null;
+      var urlParams = new URLSearchParams(window.location.search);
+      var urlVersion = urlParams.get('v');
+
+      function applyUrlSync() {
+        if (urlVersion !== localVersion && localVersion) {
+          if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(regs) {
+              regs.forEach(function(r) { r.unregister(); });
+            });
+          }
+          if ('caches' in window) {
+            caches.keys().then(function(names) {
+              names.forEach(function(n) { caches.delete(n); });
+            });
+          }
+          var url = new URL(window.location.href);
+          url.searchParams.set('v', localVersion);
+          window.location.replace(url.toString());
+        }
       }
+
+      if (!localVersion) {
+        applyUrlSync();
+        return;
+      }
+
+      fetch('version.json?t=' + Date.now(), { cache: 'no-store' })
+        .then(function(r) { return r.ok ? r.json() : null; })
+        .then(function(data) {
+          if (data && data.v != null) {
+            var serverVersion = String(data.v);
+            if (serverVersion !== localVersion) {
+              if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(function(regs) {
+                  regs.forEach(function(r) { r.unregister(); });
+                });
+              }
+              if ('caches' in window) {
+                caches.keys().then(function(names) {
+                  names.forEach(function(n) { caches.delete(n); });
+                });
+              }
+              var url = new URL(window.location.href);
+              url.searchParams.set('v', serverVersion);
+              window.location.replace(url.toString());
+              return;
+            }
+          }
+          applyUrlSync();
+        })
+        .catch(function() { applyUrlSync(); });
     })();
   </script>
 </head>
@@ -305,16 +343,16 @@
   </script>
   
   <!-- Utils (must load before views) -->
-  <script type="module" src="modules/cash-breakdown.js?v=1770935262961"></script>
-  <script type="module" src="modules/shift-validations.js?v=1770935262961"></script>
-  <script type="module" src="modules/notifications.js?v=1770935262961"></script>
+  <script type="module" src="modules/cash-breakdown.js?v=1770991063876"></script>
+  <script type="module" src="modules/shift-validations.js?v=1770991063876"></script>
+  <script type="module" src="modules/notifications.js?v=1770991063876"></script>
   
   <!-- App Scripts -->
-  <script src="modal.js?v=1770935262961"></script>
-  <script src="modal-movements.js?v=1770935262961"></script>
-  <script src="modal-incidents.js?v=1770935262961"></script>
-  <script src="modal-close-shift.js?v=1770935262961"></script>
-  <script type="module" src="app.js?v=1770935262961"></script>
+  <script src="modal.js?v=1770991063876"></script>
+  <script src="modal-movements.js?v=1770991063876"></script>
+  <script src="modal-incidents.js?v=1770991063876"></script>
+  <script src="modal-close-shift.js?v=1770991063876"></script>
+  <script type="module" src="app.js?v=1770991063876"></script>
 
   <script>
     // Global error handler
@@ -365,7 +403,7 @@
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         // Register service worker without version parameter
-        navigator.serviceWorker.register('service-worker.js?v=1770935262961')
+        navigator.serviceWorker.register('service-worker.js?v=1770991063876')
           .then(reg => {
             console.log('Service Worker registered');
             
