@@ -7,7 +7,7 @@
   <title>NRD Control de Cajas</title>
   <link rel="manifest" href="manifest.json">
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="styles.css?v=1770991063876">
+  <link rel="stylesheet" href="styles.css?v=1771195155445">
   <meta name="theme-color" content="#dc2626">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="apple-touch-icon" href="icon-192.png">
@@ -15,59 +15,40 @@
   <!-- Validate version against server: if server has newer build, force reload to avoid stale cache -->
   <script>
     (function() {
+      var RELOAD_KEY = 'nrd-version-reload-ts';
+      var RELOAD_COOLDOWN_MS = 15000;
+      var lastReload = parseInt(sessionStorage.getItem(RELOAD_KEY) || '0', 10);
+      if (Date.now() - lastReload < RELOAD_COOLDOWN_MS) return;
+
       var link = document.querySelector('link[rel="stylesheet"][href*=".css"]');
-      var localVersion = link && link.href.match(/[?&]v=(\d+)/) ? link.href.match(/[?&]v=(\d+)/)[1] : null;
-      var urlParams = new URLSearchParams(window.location.search);
-      var urlVersion = urlParams.get('v');
-
-      function applyUrlSync() {
-        if (urlVersion !== localVersion && localVersion) {
-          if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.getRegistrations().then(function(regs) {
-              regs.forEach(function(r) { r.unregister(); });
-            });
-          }
-          if ('caches' in window) {
-            caches.keys().then(function(names) {
-              names.forEach(function(n) { caches.delete(n); });
-            });
-          }
-          var url = new URL(window.location.href);
-          url.searchParams.set('v', localVersion);
-          window.location.replace(url.toString());
-        }
-      }
-
-      if (!localVersion) {
-        applyUrlSync();
-        return;
-      }
+      var match = link && link.href && link.href.match(/[?&]v=(\d+)/);
+      var localVersion = match ? String(match[1]) : null;
+      if (!localVersion) return;
 
       fetch('version.json?t=' + Date.now(), { cache: 'no-store' })
         .then(function(r) { return r.ok ? r.json() : null; })
         .then(function(data) {
-          if (data && data.v != null) {
-            var serverVersion = String(data.v);
-            if (serverVersion !== localVersion) {
-              if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.getRegistrations().then(function(regs) {
-                  regs.forEach(function(r) { r.unregister(); });
-                });
-              }
-              if ('caches' in window) {
-                caches.keys().then(function(names) {
-                  names.forEach(function(n) { caches.delete(n); });
-                });
-              }
-              var url = new URL(window.location.href);
-              url.searchParams.set('v', serverVersion);
-              window.location.replace(url.toString());
-              return;
-            }
-          }
-          applyUrlSync();
+          var serverVersion = data && data.v != null ? String(data.v) : null;
+          if (!serverVersion) return;
+          if (serverVersion === localVersion) return;
+
+          sessionStorage.setItem(RELOAD_KEY, String(Date.now()));
+
+          var sw = ('serviceWorker' in navigator)
+            ? navigator.serviceWorker.getRegistrations().then(function(regs) {
+                regs.forEach(function(r) { r.unregister(); });
+              })
+            : Promise.resolve();
+
+          var cacheClear = ('caches' in window)
+            ? caches.keys().then(function(names) { names.forEach(function(n) { caches.delete(n); }); })
+            : Promise.resolve();
+
+          Promise.all([sw, cacheClear]).finally(function() {
+            window.location.reload();
+          });
         })
-        .catch(function() { applyUrlSync(); });
+        .catch(function() {});
     })();
   </script>
 </head>
@@ -343,16 +324,16 @@
   </script>
   
   <!-- Utils (must load before views) -->
-  <script type="module" src="modules/cash-breakdown.js?v=1770991063876"></script>
-  <script type="module" src="modules/shift-validations.js?v=1770991063876"></script>
-  <script type="module" src="modules/notifications.js?v=1770991063876"></script>
+  <script type="module" src="modules/cash-breakdown.js?v=1771195155445"></script>
+  <script type="module" src="modules/shift-validations.js?v=1771195155445"></script>
+  <script type="module" src="modules/notifications.js?v=1771195155445"></script>
   
   <!-- App Scripts -->
-  <script src="modal.js?v=1770991063876"></script>
-  <script src="modal-movements.js?v=1770991063876"></script>
-  <script src="modal-incidents.js?v=1770991063876"></script>
-  <script src="modal-close-shift.js?v=1770991063876"></script>
-  <script type="module" src="app.js?v=1770991063876"></script>
+  <script src="modal.js?v=1771195155445"></script>
+  <script src="modal-movements.js?v=1771195155445"></script>
+  <script src="modal-incidents.js?v=1771195155445"></script>
+  <script src="modal-close-shift.js?v=1771195155445"></script>
+  <script type="module" src="app.js?v=1771195155445"></script>
 
   <script>
     // Global error handler
@@ -403,7 +384,7 @@
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         // Register service worker without version parameter
-        navigator.serviceWorker.register('service-worker.js?v=1770991063876')
+        navigator.serviceWorker.register('service-worker.js?v=1771195155445')
           .then(reg => {
             console.log('Service Worker registered');
             
