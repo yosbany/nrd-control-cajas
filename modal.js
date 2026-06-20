@@ -210,26 +210,7 @@ function showInfo(message) {
   return showAlert('Información', message);
 }
 
-// Loading spinner functions
-function showSpinner(message = 'Cargando...') {
-  const spinner = document.getElementById('loading-spinner');
-  if (!spinner) {
-    logger.warn('Loading spinner element not found');
-    return;
-  }
-  const messageEl = spinner.querySelector('p');
-  if (messageEl) {
-    messageEl.textContent = message;
-  }
-  spinner.classList.remove('hidden');
-}
-
-function hideSpinner() {
-  const spinner = document.getElementById('loading-spinner');
-  if (spinner) {
-    spinner.classList.add('hidden');
-  }
-}
+// Loading spinner — provided by NRDCommon (window.showSpinner / window.hideSpinner)
 
 // Modal de desglose de efectivo
 async function showCashBreakdownModal(title, initialBreakdown = null, expectedAmount = null) {

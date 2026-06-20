@@ -7,7 +7,7 @@
   <title>NRD Control de Cajas</title>
   <link rel="manifest" href="manifest.json">
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="styles.css?v=1781979488441">
+  <link rel="stylesheet" href="styles.css?v=1781980090554">
   <meta name="theme-color" content="#dc2626">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="apple-touch-icon" href="icon-192.png">
@@ -53,13 +53,7 @@
   </script>
 </head>
 <body class="bg-white text-black font-sans antialiased">
-  <!-- Loading Spinner -->
-  <div id="loading-spinner" class="fixed inset-0 bg-black/20 z-[99999] hidden flex items-center justify-center" style="z-index: 2147483647 !important;">
-    <div class="bg-white p-6 flex flex-col items-center gap-4 shadow-lg">
-      <div class="w-12 h-12 border-4 border-gray-200 border-t-red-600 animate-spin"></div>
-      <p class="text-sm text-gray-600 font-light">Cargando...</p>
-    </div>
-  </div>
+  <!-- Spinner de procesamiento: inyectado por NRDCommon -->
 
   <!-- Redirecting Screen -->
   <div id="redirecting-screen" class="min-h-screen flex items-center justify-center bg-white">
@@ -251,16 +245,16 @@
   </script>
   
   <!-- Utils (must load before views) -->
-  <script type="module" src="modules/cash-breakdown.js?v=1781979488441"></script>
-  <script type="module" src="modules/shift-validations.js?v=1781979488441"></script>
-  <script type="module" src="modules/notifications.js?v=1781979488441"></script>
+  <script type="module" src="modules/cash-breakdown.js?v=1781980090554"></script>
+  <script type="module" src="modules/shift-validations.js?v=1781980090554"></script>
+  <script type="module" src="modules/notifications.js?v=1781980090554"></script>
   
   <!-- App Scripts -->
-  <script src="modal.js?v=1781979488441"></script>
-  <script src="modal-movements.js?v=1781979488441"></script>
-  <script src="modal-incidents.js?v=1781979488441"></script>
-  <script src="modal-close-shift.js?v=1781979488441"></script>
-  <script type="module" src="app.js?v=1781979488441"></script>
+  <script src="modal.js?v=1781980090554"></script>
+  <script src="modal-movements.js?v=1781980090554"></script>
+  <script src="modal-incidents.js?v=1781980090554"></script>
+  <script src="modal-close-shift.js?v=1781980090554"></script>
+  <script type="module" src="app.js?v=1781980090554"></script>
 
   <script>
     // Global error handler
@@ -311,7 +305,7 @@
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         // Register service worker without version parameter
-        navigator.serviceWorker.register('service-worker.js?v=1781979488441')
+        navigator.serviceWorker.register('service-worker.js?v=1781980090554')
           .then(reg => {
             console.log('Service Worker registered');
             
